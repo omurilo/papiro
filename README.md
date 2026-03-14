@@ -41,6 +41,8 @@ Para gerar um site a partir de arquivos Markdown:
 ./papiro build
 ```
 
+- A pasta `examples` trás um exemplo completo de como pode ser um projeto papiro, a pasta `examples/first-blog/theme` é completamente opcional.
+
 ## Contribuição
 
 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.

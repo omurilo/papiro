@@ -13,19 +13,19 @@ import (
 	"github.com/omurilo/papiro/internal/tmpl"
 )
 
-func loadTemplates() (*template.Template, *template.Template, error) {
+func loadThemeTemplates() (*template.Template, *template.Template, error) {
 	var postTmpl, indexTmpl *template.Template
 	var err error
 
-	if _, errStat := os.Stat("templates/template.html"); errStat == nil {
-		fmt.Println("Usando templates customizados da pasta /templates...")
+	if _, errStat := os.Stat("theme/post_template.html"); errStat == nil {
+		fmt.Println("Usando templates customizados da pasta /theme...")
 
-		postTmpl, err = template.ParseFiles("templates/post_template.html")
+		postTmpl, err = template.ParseFiles("theme/post_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no post_template.html local: %v", err)
 		}
 
-		indexTmpl, err = template.ParseFiles("templates/index_template.html")
+		indexTmpl, err = template.ParseFiles("theme/index_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no index_templat.html local: %v", err)
 		}
@@ -60,7 +60,7 @@ func BuildSite() error {
 		}
 	}
 
-	postTmpl, indexTmpl, err := loadTemplates()
+	postTmpl, indexTmpl, err := loadThemeTemplates()
 	if err != nil {
 		return err
 	}

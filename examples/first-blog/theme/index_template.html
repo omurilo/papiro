@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Blog</title>
+    <link rel="stylesheet" href="static/index.css" />
+</head>
+<body>
+    <nav>
+        <strong>First Blog</strong> | <a href="index.html">Home</a>
+    </nav>
+    <header>
+        <h1>First Blog</h1>
+    </header>
+    <main>
+        <ul class="post-list">
+            {{range .Posts}}
+            <li>
+                <span class="post-date">{{.Meta.Date}}</span>
+                <a href="{{.URL}}"><strong>{{.Meta.Title}}</strong></a>
+            </li>
+            {{end}}
+        </ul>
+    </main>
+</body>
+</html>
