@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Meta.Title}}</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+        nav { margin-bottom: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem; }
+        .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <strong>Meu Blog em Go</strong> | <a href="index.html">Home</a>
+    </nav>
+    
+    <header>
+        <h1>{{.Meta.Title}}</h1>
+        <div class="meta">
+            Escrito por <strong>{{.Meta.Author}}</strong> em {{.Meta.Date}}
+        </div>
+    </header>
+
+    <main>
+        {{.Content}} 
+    </main>
+</body>
+</html>
