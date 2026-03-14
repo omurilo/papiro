@@ -1,8 +1,10 @@
 package builder
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -11,7 +13,7 @@ import (
 	"github.com/omurilo/papiro/internal/tmpl"
 )
 
-func LoadTemplates() (*template.Template, *template.Template, error) {
+func loadTemplates() (*template.Template, *template.Template, error) {
 	var postTmpl, indexTmpl *template.Template
 	var err error
 
@@ -47,7 +49,18 @@ func LoadTemplates() (*template.Template, *template.Template, error) {
 func BuildSite() error {
 	os.MkdirAll("public", 0755)
 
-	postTmpl, indexTmpl, err := LoadTemplates()
+	if _, err := os.Stat("static"); !os.IsNotExist(err) {
+		if err := copyDir("static", "public"); err != nil {
+			return fmt.Errorf("erro ao copiar diretório static: %v", err)
+		}
+		fmt.Println("Diretório estático copiado com sucesso!")
+	} else {
+		if err := copyDirEmbedded(tmpl.Files, "public"); err != nil {
+			return err
+		}
+	}
+
+	postTmpl, indexTmpl, err := loadTemplates()
 	if err != nil {
 		return err
 	}
@@ -79,4 +92,42 @@ func BuildSite() error {
 	parser.MakeIndex(allPosts, indexTmpl)
 
 	return nil
+}
+
+func copyDir(src string, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, _ := filepath.Rel(src, path)
+		destPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		}
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		return os.WriteFile(destPath, data, info.Mode())
+	})
+}
+
+func copyDirEmbedded(src embed.FS, dst string) error {
+	return fs.WalkDir(src, "static", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return os.MkdirAll(filepath.Join(dst, path), 0755)
+		}
+		data, err := fs.ReadFile(src, path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(dst, path), data, 0644)
+	})
 }

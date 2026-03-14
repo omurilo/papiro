@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Meu Blog em Go</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
-        nav { margin-bottom: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem; }
-        .post-list { list-style: none; padding: 0; }
-        .post-list li { margin-bottom: 1rem; }
-        .post-date { color: #666; font-size: 0.9rem; margin-right: 10px; }
-    </style>
+    <title>Papiro Blog</title>
+    <link rel="stylesheet" href="static/index.css" />
 </head>
 <body>
     <nav>
-        <strong>Meu Blog em Go</strong> | <a href="index.html">Home</a>
+        <strong>Papiro Blog</strong> | <a href="index.html">Home</a>
     </nav>
-    
     <header>
-        <h1>Últimos Posts</h1>
+        <h1>Papiro Blog</h1>
     </header>
-
     <main>
         <ul class="post-list">
             {{range .Posts}}
