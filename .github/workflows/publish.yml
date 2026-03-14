@@ -25,6 +25,8 @@ jobs:
         run: go build -o papiro ./cmd/papiro/
 
       - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "Publishing version ${{ github.ref }}"
           # Add your publishing logic here, e.g., upload to a release or a package registry
