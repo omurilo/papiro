@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -13,9 +14,13 @@ import (
 )
 
 type Frontmatter struct {
-	Title  string    `yaml:"title"`
-	Date   time.Time `yaml:"date"`
-	Author string    `yaml:"author"`
+	Title  string   `yaml:"title"`
+	Date   YamlDate `yaml:"date"`
+	Author string   `yaml:"author"`
+}
+
+type YamlDate struct {
+	time.Time
 }
 
 type PageData struct {
@@ -30,6 +35,18 @@ type PostInfo struct {
 
 type IndexData struct {
 	Posts []PostInfo
+}
+
+func (d *YamlDate) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.ScalarNode {
+		t, err := time.Parse("2006-01-02", value.Value)
+		if err != nil {
+			return err
+		}
+		d.Time = t
+		return nil
+	}
+	return fmt.Errorf("invalid date format")
 }
 
 func parseMarkdown(content []byte) (Frontmatter, []byte, error) {
@@ -53,7 +70,8 @@ func parseMarkdown(content []byte) (Frontmatter, []byte, error) {
 		meta.Title = "Post sem título"
 	}
 	if meta.Date.IsZero() {
-		meta.Date, _ = time.Parse("2006-01-02", "1970-01-01")
+		mDate, _ := time.Parse("2006-01-02", "1970-01-01")
+		meta.Date = YamlDate{mDate}
 	}
 
 	return meta, body, nil

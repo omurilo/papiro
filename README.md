@@ -35,6 +35,18 @@ Veja os comandos disponíveis com:
 
 ## Exemplo de uso
 
+### Comando `init`
+
+Para começar rapidamente um novo projeto com a estrutura básica, use:
+
+```bash
+./papiro init
+```
+
+Esse comando cria as pastas essenciais (`content` e `theme/static`), copia os templates padrão para a pasta `theme` e gera um exemplo de post Markdown em `content/hello-world.md`. Assim, você pode começar a escrever imediatamente sem se preocupar com a configuração inicial.
+
+### Comando `build`
+
 Para gerar um site a partir de arquivos Markdown:
 
 ```bash
