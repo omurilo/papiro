@@ -84,10 +84,12 @@ func BuildSite() error {
 		if filepath.Ext(file.Name()) == ".md" {
 			info, err := parser.ProcessFile(file.Name(), postTmpl)
 			if err != nil {
-				return err
+				fmt.Printf("Aviso: erro ao processar %s: %v\n", file.Name(), err)
+				continue
 			}
 
-			if info.Meta.Draft == true {
+			if info.Meta.Draft {
+				fmt.Printf("Rascunho gerado (oculto da Home): %s\n", info.URL)
 				continue
 			}
 
