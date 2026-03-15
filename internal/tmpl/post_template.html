@@ -4,22 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Meta.Title}}</title>
-    <link rel="stylesheet" href="static/index.css" />
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <nav>
-        <strong>Meu Blog em Go</strong> | <a href="index.html">Home</a>
-    </nav>
-    
-    <header>
-        <h1>{{.Meta.Title}}</h1>
-        <div class="meta">
-            Escrito por <strong>{{.Meta.Author}}</strong> em {{.Meta.Date}}
-        </div>
-    </header>
+    <div class="container">
+        <nav>
+            <a href="index.html" style="border: none;">📜 Voltar aos Escritos</a>
+        </nav>
+        
+        <article class="papiro-sheet">
+            <header>
+                <h1>{{.Meta.Title}}</h1>
+                <div class="meta">
+                    Registrado por {{.Meta.Author}} em {{ date "02 Jan, 2006" .Meta.Date}}
+                </div>
+            </header>
 
-    <main>
-        {{.Content}} 
-    </main>
+            <main class="content">
+                {{.Content}} 
+            </main>
+        </article>
+
+        <footer>
+            <p>Gerado pelo motor <strong>Papiro</strong></p>
+        </footer>
+    </div>
 </body>
 </html>

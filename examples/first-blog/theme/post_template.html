@@ -14,7 +14,7 @@
     <header>
         <h1>{{.Meta.Title}}</h1>
         <div class="meta">
-            Escrito por <strong>{{.Meta.Author}}</strong> em {{.Meta.Date}}
+            Escrito por <strong>{{.Meta.Author}}</strong> em {{ date "02 Jan, 2006" .Meta.Date}}
         </div>
     </header>
 

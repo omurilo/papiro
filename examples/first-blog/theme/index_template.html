@@ -17,7 +17,7 @@
         <ul class="post-list">
             {{range .Posts}}
             <li>
-                <span class="post-date">{{.Meta.Date}}</span>
+                <span class="post-date">{{ date "02-01-2006" .Meta.Date}}</span>
                 <a href="{{.URL}}"><strong>{{.Meta.Title}}</strong></a>
             </li>
             {{end}}

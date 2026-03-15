@@ -6,15 +6,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/yuin/goldmark"
 	"gopkg.in/yaml.v3"
 )
 
 type Frontmatter struct {
-	Title  string `yaml:"title"`
-	Date   string `yaml:"date"`
-	Author string `yaml:"author"`
+	Title  string    `yaml:"title"`
+	Date   time.Time `yaml:"date"`
+	Author string    `yaml:"author"`
 }
 
 type PageData struct {
@@ -51,8 +52,8 @@ func parseMarkdown(content []byte) (Frontmatter, []byte, error) {
 	if meta.Title == "" {
 		meta.Title = "Post sem título"
 	}
-	if meta.Date == "" {
-		meta.Date = "1970-01-01"
+	if meta.Date.IsZero() {
+		meta.Date, _ = time.Parse("2006-01-02", "1970-01-01")
 	}
 
 	return meta, body, nil

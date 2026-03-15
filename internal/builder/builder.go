@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 
 	"github.com/omurilo/papiro/internal/parser"
 	"github.com/omurilo/papiro/internal/tmpl"
@@ -17,27 +18,33 @@ func loadThemeTemplates() (*template.Template, *template.Template, error) {
 	var postTmpl, indexTmpl *template.Template
 	var err error
 
+	tmplFuncs := template.FuncMap{
+		"date": func(layout string, date time.Time) string {
+			return date.Format(layout)
+		},
+	}
+
 	if _, errStat := os.Stat("theme/post_template.html"); errStat == nil {
 		fmt.Println("Usando templates customizados da pasta /theme...")
 
-		postTmpl, err = template.ParseFiles("theme/post_template.html")
+		postTmpl, err = template.New("post_template.html").Funcs(tmplFuncs).ParseFiles("theme/post_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no post_template.html local: %v", err)
 		}
 
-		indexTmpl, err = template.ParseFiles("theme/index_template.html")
+		indexTmpl, err = template.New("index_template.html").Funcs(tmplFuncs).ParseFiles("theme/index_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no index_templat.html local: %v", err)
 		}
 	} else {
 		fmt.Println("Usando tema padrão embutido no Papiro...")
 
-		postTmpl, err = template.ParseFS(tmpl.Files, "post_template.html")
+		postTmpl, err = template.New("post_template.html").Funcs(tmplFuncs).ParseFS(tmpl.Files, "post_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
 
-		indexTmpl, err = template.ParseFS(tmpl.Files, "index_template.html")
+		indexTmpl, err = template.New("index_template.html").Funcs(tmplFuncs).ParseFS(tmpl.Files, "index_template.html")
 		if err != nil {
 			return nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
@@ -47,10 +54,15 @@ func loadThemeTemplates() (*template.Template, *template.Template, error) {
 }
 
 func BuildSite() error {
+	files, err := os.ReadDir("content")
+	if err != nil {
+		return fmt.Errorf("erro ao tentar ler o diretório de conteúdo: \n\t%v", err)
+	}
+
 	os.MkdirAll("public", 0755)
 
-	if _, err := os.Stat("static"); !os.IsNotExist(err) {
-		if err := copyDir("static", "public"); err != nil {
+	if _, err := os.Stat("theme/static"); !os.IsNotExist(err) {
+		if err := copyDir("theme/static", "public/static"); err != nil {
 			return fmt.Errorf("erro ao copiar diretório static: %v", err)
 		}
 		fmt.Println("Diretório estático copiado com sucesso!")
@@ -67,11 +79,6 @@ func BuildSite() error {
 
 	fmt.Println("Templates carregados com sucesso!")
 
-	files, err := os.ReadDir("content")
-	if err != nil {
-		return err
-	}
-
 	var allPosts []parser.PostInfo
 
 	for _, file := range files {
@@ -86,7 +93,7 @@ func BuildSite() error {
 	}
 
 	sort.Slice(allPosts, func(i, j int) bool {
-		return allPosts[i].Meta.Date > allPosts[j].Meta.Date
+		return allPosts[i].Meta.Date.Before(allPosts[j].Meta.Date)
 	})
 
 	parser.MakeIndex(allPosts, indexTmpl)
