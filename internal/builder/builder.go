@@ -87,6 +87,10 @@ func BuildSite() error {
 				return err
 			}
 
+			if info.Meta.Draft == true {
+				continue
+			}
+
 			allPosts = append(allPosts, info)
 		}
 	}

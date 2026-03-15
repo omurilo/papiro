@@ -17,6 +17,7 @@ type Frontmatter struct {
 	Title  string   `yaml:"title"`
 	Date   YamlDate `yaml:"date"`
 	Author string   `yaml:"author"`
+	Draft  bool     `yaml:"draft"`
 }
 
 type YamlDate struct {
