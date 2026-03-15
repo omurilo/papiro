@@ -130,22 +130,11 @@ func InitSite() error {
 	os.MkdirAll("content", 0755)
 	os.MkdirAll("theme/static", 0755)
 
-	if err := copyDirEmbedded(tmpl.Files, "static", "theme"); err != nil {
+	if err := copyDirEmbedded(tmpl.Files, ".", "theme"); err != nil {
 		return err
 	}
 
-	if err := copyDirEmbedded(tmpl.Files, "post_template.html", "theme"); err != nil {
-		return err
-	}
-
-	if err := copyDirEmbedded(tmpl.Files, "index_template.html", "theme"); err != nil {
-		return err
-	}
-
-	if err := copyDirEmbedded(tmpl.Files, "papiro.yaml", "."); err != nil {
-		return err
-	}
-
+	os.WriteFile("papiro.yaml", []byte("title: Papiro Blog\ndescription: Um blog sobre Papiro\nurl: example.com\nlanguage: pt-BR"), 0644)
 	os.WriteFile("content/hello-world.md", []byte("---\ntitle: \"Olá, Mundo! Bem-vindo ao Papiro.\"\ndate: 2026-03-14\nauthor: \"Murilo\"\n---\n\n# O Início de uma Nova Jornada\n\nSe você está lendo isso, significa que o comando `init` funcionou perfeitamente e o motor do **Papiro** já está rodando! \n\nEste é um gerador de sites estáticos focado em simplicidade, velocidade e na beleza da escrita em texto puro. Tudo o que você precisa fazer é escrever em Markdown e deixar que o Go faça o resto.\n\n## O que você pode fazer aqui?\n\nComo usamos o padrão Markdown, você tem total liberdade para formatar seus textos de forma rápida:\n\n* Criar **textos em negrito** para dar ênfase.\n* Usar *itálico* para pensamentos ou termos estrangeiros.\n* Fazer listas organizadas, como esta.\n\nSe precisar citar alguém importante, o design clássico cuida disso:\n\n> \"A simplicidade é o último grau de sofisticação.\" \n> — Leonardo da Vinci\n\n### Suporte a Código\n\nE como todo bom desenvolvedor, você pode compartilhar seus trechos de código facilmente. O Papiro já deixa tudo bem formatado:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"O Papiro é rápido demais!\")\n}\n```"), 0644)
 	return nil
 }
@@ -174,7 +163,6 @@ func copyDir(src string, dst string) error {
 
 func copyDirEmbedded(src embed.FS, srcPath, dst string) error {
 	return fs.WalkDir(src, srcPath, func(path string, d fs.DirEntry, err error) error {
-		fmt.Println(path)
 		if err != nil {
 			return err
 		}
