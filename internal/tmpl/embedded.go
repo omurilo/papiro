@@ -2,5 +2,5 @@ package tmpl
 
 import "embed"
 
-//go:embed *.html static/*
+//go:embed *.html *.rss *.yaml static/*
 var Files embed.FS

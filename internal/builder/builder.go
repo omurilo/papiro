@@ -8,13 +8,16 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	textTmpl "text/template"
 
+	"github.com/omurilo/papiro/internal/config"
 	"github.com/omurilo/papiro/internal/parser"
 	"github.com/omurilo/papiro/internal/tmpl"
 )
 
-func loadThemeTemplates() (*template.Template, *template.Template, error) {
+func loadThemeTemplates() (*template.Template, *template.Template, *textTmpl.Template, error) {
 	var postTmpl, indexTmpl *template.Template
+	var feedTmpl *textTmpl.Template
 	var err error
 
 	tmplFuncs := template.FuncMap{
@@ -28,31 +31,46 @@ func loadThemeTemplates() (*template.Template, *template.Template, error) {
 
 		postTmpl, err = template.New("post_template.html").Funcs(tmplFuncs).ParseFiles("theme/post_template.html")
 		if err != nil {
-			return nil, nil, fmt.Errorf("erro no post_template.html local: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no post_template.html local: %v", err)
 		}
 
 		indexTmpl, err = template.New("index_template.html").Funcs(tmplFuncs).ParseFiles("theme/index_template.html")
 		if err != nil {
-			return nil, nil, fmt.Errorf("erro no index_templat.html local: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no index_templat.html local: %v", err)
+		}
+
+		feedTmpl, err = textTmpl.New("feed.rss").Funcs(tmplFuncs).ParseFiles("theme/feed.rss")
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("erro no feed_template.html local: %v", err)
 		}
 	} else {
 		fmt.Println("Usando tema padrão embutido no Papiro...")
 
 		postTmpl, err = template.New("post_template.html").Funcs(tmplFuncs).ParseFS(tmpl.Files, "post_template.html")
 		if err != nil {
-			return nil, nil, fmt.Errorf("erro no template embutido: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
 
 		indexTmpl, err = template.New("index_template.html").Funcs(tmplFuncs).ParseFS(tmpl.Files, "index_template.html")
 		if err != nil {
-			return nil, nil, fmt.Errorf("erro no template embutido: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no template embutido: %v", err)
+		}
+
+		feedTmpl, err = textTmpl.New("feed.rss").Funcs(tmplFuncs).ParseFS(tmpl.Files, "feed.rss")
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
 	}
 
-	return postTmpl, indexTmpl, nil
+	return postTmpl, indexTmpl, feedTmpl, nil
 }
 
 func BuildSite() error {
+	cfg, err := config.LoadConfig("papiro.yaml")
+	if err != nil {
+		return fmt.Errorf("erro ao carregar configuração: %v", err)
+	}
+
 	files, err := os.ReadDir("content")
 	if err != nil {
 		return fmt.Errorf("erro ao tentar ler o diretório de conteúdo: \n\t%v", err)
@@ -71,7 +89,7 @@ func BuildSite() error {
 		}
 	}
 
-	postTmpl, indexTmpl, err := loadThemeTemplates()
+	postTmpl, indexTmpl, feedTmpl, err := loadThemeTemplates()
 	if err != nil {
 		return err
 	}
@@ -103,6 +121,8 @@ func BuildSite() error {
 
 	parser.MakeIndex(allPosts, indexTmpl)
 
+	parser.MakeRSS(allPosts, feedTmpl, cfg)
+
 	return nil
 }
 
@@ -110,7 +130,19 @@ func InitSite() error {
 	os.MkdirAll("content", 0755)
 	os.MkdirAll("theme/static", 0755)
 
-	if err := copyDirEmbedded(tmpl.Files, ".", "theme"); err != nil {
+	if err := copyDirEmbedded(tmpl.Files, "static", "theme"); err != nil {
+		return err
+	}
+
+	if err := copyDirEmbedded(tmpl.Files, "post_template.html", "theme"); err != nil {
+		return err
+	}
+
+	if err := copyDirEmbedded(tmpl.Files, "index_template.html", "theme"); err != nil {
+		return err
+	}
+
+	if err := copyDirEmbedded(tmpl.Files, "papiro.yaml", "."); err != nil {
 		return err
 	}
 

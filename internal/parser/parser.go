@@ -7,8 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	textTmpl "text/template"
 	"time"
 
+	"github.com/omurilo/papiro/internal/config"
 	"github.com/yuin/goldmark"
 	"gopkg.in/yaml.v3"
 )
@@ -35,7 +37,11 @@ type PostInfo struct {
 }
 
 type IndexData struct {
-	Posts []PostInfo
+	Posts           []PostInfo
+	BlogUrl         string
+	FeedTitle       string
+	FeedDescription string
+	FeedLanguage    string
 }
 
 func (d *YamlDate) UnmarshalYAML(value *yaml.Node) error {
@@ -84,6 +90,30 @@ func MakeIndex(posts []PostInfo, tmpl *template.Template) error {
 	}
 
 	outputPath := filepath.Join("public", "index.html")
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+
+	defer outputFile.Close()
+
+	if err := tmpl.Execute(outputFile, data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func MakeRSS(posts []PostInfo, tmpl *textTmpl.Template, cfg *config.Config) error {
+	data := IndexData{
+		Posts:           posts,
+		BlogUrl:         cfg.URL,
+		FeedTitle:       cfg.Title,
+		FeedDescription: cfg.Description,
+		FeedLanguage:    cfg.Language,
+	}
+
+	outputPath := filepath.Join("public", "feed.xml")
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		return err
