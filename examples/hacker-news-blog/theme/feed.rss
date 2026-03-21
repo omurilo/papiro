@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>{{.FeedTitle}}</title>
+    <link>https://{{.BlogUrl}}</link>
+    <description>{{.FeedDescription}}</description>
+    <language>{{.FeedLanguage}}</language>
+
+    {{range .Posts}}
+    <item>
+      <title>{{.Meta.Title}}</title>
+      <link>https://{{$.BlogUrl}}/{{.URL}}</link>
+      <description>Escrito por {{.Meta.Author}}.</description>
+      <pubDate>{{ date "Mon, 02 Jan 2006 15:04:05 -0700" .Meta.Date }}</pubDate>
+      <guid>https://{{$.BlogUrl}}/{{.URL}}</guid>
+    </item>
+    {{end}}
+
+  </channel>
+</rss>

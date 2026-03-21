@@ -1,0 +1,93 @@
+body {
+    font-family: Verdana, Geneva, sans-serif;
+    background-color: #f6f6ef;
+    margin: 0;
+    padding: 0;
+    color: #000000;
+}
+
+.container {
+    width: 85%;
+    margin: 8px auto;
+    background-color: #f6f6ef;
+}
+
+header {
+    background-color: #ff6600;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+header .logo {
+    border: 1px solid white;
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    text-align: center;
+    line-height: 18px;
+    font-weight: bold;
+    color: white;
+    margin-right: 4px;
+    font-size: 12px;
+}
+
+header .title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+header nav a {
+    color: #000000;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+header nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 10px 0;
+}
+
+.post-item {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.post-item a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.post-item a:hover {
+    text-decoration: underline;
+}
+
+.post-meta {
+    font-size: 10px;
+    color: #828282;
+    margin-top: 2px;
+}
+
+.post-content {
+    background-color: #f6f6ef;
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.post-content h1, .post-content h2, .post-content h3 {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+footer {
+    border-top: 2px solid #ff6600;
+    margin-top: 20px;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 12px;
+}

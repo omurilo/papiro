@@ -24,6 +24,9 @@ func loadThemeTemplates() (*template.Template, *template.Template, *textTmpl.Tem
 		"date": func(layout string, date parser.YamlDate) string {
 			return date.Format(layout)
 		},
+		"add": func(a, b int) int {
+			return a + b
+		},
 	}
 
 	if _, errStat := os.Stat("theme/post_template.html"); errStat == nil {
@@ -36,12 +39,12 @@ func loadThemeTemplates() (*template.Template, *template.Template, *textTmpl.Tem
 
 		indexTmpl, err = template.New("index_template.html").Funcs(tmplFuncs).ParseFiles("theme/index_template.html")
 		if err != nil {
-			return nil, nil, nil, fmt.Errorf("erro no index_templat.html local: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no index_template.html local: %v", err)
 		}
 
-		feedTmpl, err = textTmpl.New("feed.rss").Funcs(tmplFuncs).ParseFiles("theme/feed.rss")
+		feedTmpl, err = textTmpl.New("feed.rss").Funcs(textTmpl.FuncMap(tmplFuncs)).ParseFiles("theme/feed.rss")
 		if err != nil {
-			return nil, nil, nil, fmt.Errorf("erro no feed_template.html local: %v", err)
+			return nil, nil, nil, fmt.Errorf("erro no feed.rss local: %v", err)
 		}
 	} else {
 		fmt.Println("Usando tema padrão embutido no Papiro...")
@@ -56,7 +59,7 @@ func loadThemeTemplates() (*template.Template, *template.Template, *textTmpl.Tem
 			return nil, nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
 
-		feedTmpl, err = textTmpl.New("feed.rss").Funcs(tmplFuncs).ParseFS(tmpl.Files, "feed.rss")
+		feedTmpl, err = textTmpl.New("feed.rss").Funcs(textTmpl.FuncMap(tmplFuncs)).ParseFS(tmpl.Files, "feed.rss")
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("erro no template embutido: %v", err)
 		}
@@ -100,7 +103,7 @@ func BuildSite() error {
 
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".md" {
-			info, err := parser.ProcessFile(file.Name(), postTmpl)
+			info, err := parser.ProcessFile(file.Name(), postTmpl, cfg)
 			if err != nil {
 				fmt.Printf("Aviso: erro ao processar %s: %v\n", file.Name(), err)
 				continue
@@ -116,26 +119,30 @@ func BuildSite() error {
 	}
 
 	sort.Slice(allPosts, func(i, j int) bool {
-		return allPosts[i].Meta.Date.Time.Before(allPosts[j].Meta.Date.Time)
+		return allPosts[i].Meta.Date.Time.After(allPosts[j].Meta.Date.Time)
 	})
 
-	parser.MakeIndex(allPosts, indexTmpl)
+	parser.MakeIndex(allPosts, indexTmpl, cfg)
 
 	parser.MakeRSS(allPosts, feedTmpl, cfg)
 
 	return nil
 }
 
-func InitSite() error {
-	os.MkdirAll("content", 0755)
-	os.MkdirAll("theme/static", 0755)
+func InitSite(basePath string) error {
+	path := "."
+	if basePath != "" {
+		path = basePath
+	}
+	os.MkdirAll(filepath.Join(path, "content"), 0755)
+	os.MkdirAll(filepath.Join(path, "theme/static"), 0755)
 
-	if err := copyDirEmbedded(tmpl.Files, ".", "theme"); err != nil {
+	if err := copyDirEmbedded(tmpl.Files, ".", filepath.Join(path, "theme")); err != nil {
 		return err
 	}
 
-	os.WriteFile("papiro.yaml", []byte("title: Papiro Blog\ndescription: Um blog sobre Papiro\nurl: example.com\nlanguage: pt-BR"), 0644)
-	os.WriteFile("content/hello-world.md", []byte("---\ntitle: \"Olá, Mundo! Bem-vindo ao Papiro.\"\ndate: 2026-03-14\nauthor: \"Murilo\"\n---\n\n# O Início de uma Nova Jornada\n\nSe você está lendo isso, significa que o comando `init` funcionou perfeitamente e o motor do **Papiro** já está rodando! \n\nEste é um gerador de sites estáticos focado em simplicidade, velocidade e na beleza da escrita em texto puro. Tudo o que você precisa fazer é escrever em Markdown e deixar que o Go faça o resto.\n\n## O que você pode fazer aqui?\n\nComo usamos o padrão Markdown, você tem total liberdade para formatar seus textos de forma rápida:\n\n* Criar **textos em negrito** para dar ênfase.\n* Usar *itálico* para pensamentos ou termos estrangeiros.\n* Fazer listas organizadas, como esta.\n\nSe precisar citar alguém importante, o design clássico cuida disso:\n\n> \"A simplicidade é o último grau de sofisticação.\" \n> — Leonardo da Vinci\n\n### Suporte a Código\n\nE como todo bom desenvolvedor, você pode compartilhar seus trechos de código facilmente. O Papiro já deixa tudo bem formatado:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"O Papiro é rápido demais!\")\n}\n```"), 0644)
+	os.WriteFile(filepath.Join(path, "papiro.yaml"), []byte("title: Papiro Blog\ndescription: Um blog sobre Papiro\nurl: example.com\nlanguage: pt-BR"), 0644)
+	os.WriteFile(filepath.Join(path, "content/hello-world.md"), []byte("---\ntitle: \"Olá, Mundo! Bem-vindo ao Papiro.\"\ndate: 2026-03-14\nauthor: \"Murilo\"\n---\n\n# O Início de uma Nova Jornada\n\nSe você está lendo isso, significa que o comando `init` funcionou perfeitamente e o motor do **Papiro** já está rodando! \n\nEste é um gerador de sites estáticos focado em simplicidade, velocidade e na beleza da escrita em texto puro. Tudo o que você precisa fazer é escrever em Markdown e deixar que o Go faça o resto.\n\n## O que você pode fazer aqui?\n\nComo usamos o padrão Markdown, você tem total liberdade para formatar seus textos de forma rápida:\n\n* Criar **textos em negrito** para dar ênfase.\n* Usar *itálico* para pensamentos ou termos estrangeiros.\n* Fazer listas organizadas, como esta.\n\nSe precisar citar alguém importante, o design clássico cuida disso:\n\n> \"A simplicidade é o último grau de sofisticação.\" \n> — Leonardo da Vinci\n\n### Suporte a Código\n\nE como todo bom desenvolvedor, você pode compartilhar seus trechos de código facilmente. O Papiro já deixa tudo bem formatado:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"O Papiro é rápido demais!\")\n}\n```"), 0644)
 	return nil
 }
 

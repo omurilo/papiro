@@ -7,11 +7,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var path string
+
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize a new Papiro blog",
+	Use:   "init [path]",
+	Short: "Initialize a new Papiro blog at path (default \".\")",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := builder.InitSite(); err != nil {
+		if len(args) != 0 {
+			path = args[0]
+		}
+		if err := builder.InitSite(path); err != nil {
 			log.Fatalf("erro ao inicializar o site: %v", err)
 		}
 	},

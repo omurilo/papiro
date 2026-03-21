@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Meta.Title}} | {{.Config.Title}}</title>
+    <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="logo">P</span>
+            <span class="title">{{.Config.Title}}</span>
+            <nav>
+                <a href="index.html">new</a> |
+                <a href="feed.rss">rss</a>
+            </nav>
+        </header>
+        <main>
+            <div class="post-item">
+                <h1 style="font-size: 14px; margin: 0; font-weight: normal;"><a href="{{.URL}}">{{.Meta.Title}}</a></h1>
+                <div class="post-meta" style="margin-bottom: 10px;">
+                    by {{.Meta.Author}} | {{ date "2006-01-02" .Meta.Date}}
+                </div>
+            </div>
+            <div class="post-content">
+                {{.Content}}
+            </div>
+        </main>
+        <footer>
+            Built with <a href="https://github.com/oMuriloDev/papiro">Papiro</a>
+        </footer>
+    </div>
+</body>
+</html>

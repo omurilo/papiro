@@ -29,6 +29,8 @@ type YamlDate struct {
 type PageData struct {
 	Meta    Frontmatter
 	Content template.HTML
+	Config  *config.Config
+	URL     string
 }
 
 type PostInfo struct {
@@ -38,6 +40,7 @@ type PostInfo struct {
 
 type IndexData struct {
 	Posts           []PostInfo
+	Config          *config.Config
 	BlogUrl         string
 	FeedTitle       string
 	FeedDescription string
@@ -84,9 +87,10 @@ func parseMarkdown(content []byte) (Frontmatter, []byte, error) {
 	return meta, body, nil
 }
 
-func MakeIndex(posts []PostInfo, tmpl *template.Template) error {
+func MakeIndex(posts []PostInfo, tmpl *template.Template, cfg *config.Config) error {
 	data := IndexData{
-		Posts: posts,
+		Posts:  posts,
+		Config: cfg,
 	}
 
 	outputPath := filepath.Join("public", "index.html")
@@ -107,6 +111,7 @@ func MakeIndex(posts []PostInfo, tmpl *template.Template) error {
 func MakeRSS(posts []PostInfo, tmpl *textTmpl.Template, cfg *config.Config) error {
 	data := IndexData{
 		Posts:           posts,
+		Config:          cfg,
 		BlogUrl:         cfg.URL,
 		FeedTitle:       cfg.Title,
 		FeedDescription: cfg.Description,
@@ -128,7 +133,7 @@ func MakeRSS(posts []PostInfo, tmpl *textTmpl.Template, cfg *config.Config) erro
 	return nil
 }
 
-func ProcessFile(filename string, tmpl *template.Template) (PostInfo, error) {
+func ProcessFile(filename string, tmpl *template.Template, cfg *config.Config) (PostInfo, error) {
 	var info PostInfo
 
 	mdPath := filepath.Join("content", filename)
@@ -144,14 +149,16 @@ func ProcessFile(filename string, tmpl *template.Template) (PostInfo, error) {
 		return info, err
 	}
 
-	data := PageData{
-		Meta:    meta,
-		Content: template.HTML(buf.String()),
-	}
-
 	nameWithoutExtension := strings.TrimSuffix(filename, ".md")
 	finalName := nameWithoutExtension + ".html"
 	outputPath := filepath.Join("public", finalName)
+
+	data := PageData{
+		Meta:    meta,
+		Content: template.HTML(buf.String()),
+		Config:  cfg,
+		URL:     finalName,
+	}
 
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
